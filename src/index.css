@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   THEME — CSS Custom Properties (Dark / Light)
+   ═══════════════════════════════════════════════════════════ */
+
+:root,
+[data-theme="dark"] {
+  --bg:          #000000;
+  --card:        #1c1c1e;
+  --card-h:      #222224;
+  --elev:        #2c2c2e;
+  --tert:        #3a3a3c;
+  --tx:          #f5f5f7;
+  --tx2:         #86868b;
+  --tx3:         #48484a;
+  --bd:          #1c1c1e;
+  --bd2:         #2c2c2e;
+  --overlay:     rgba(0, 0, 0, 0.7);
+  --header-bg:   rgba(0, 0, 0, 0.8);
+  --tooltip-bg:  #2c2c2e;
+  --tooltip-sh:  rgba(0, 0, 0, 0.5);
+  --grid-line:   rgba(255, 255, 255, 0.04);
+  --scroll-th:   rgba(255, 255, 255, 0.1);
+  --scroll-th-h: rgba(255, 255, 255, 0.18);
+  --date-filter:  invert(0.6);
+  --slider-shadow: 0 1px 4px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1);
+  --slider-shadow-h: 0 2px 8px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.15);
+  --input-bg:    #2c2c2e;
+  --accent-subtle: rgba(10, 132, 255, 0.06);
+}
+
+[data-theme="light"] {
+  --bg:          #f5f5f7;
+  --card:        #ffffff;
+  --card-h:      #f7f7f7;
+  --elev:        #f0f0f0;
+  --tert:        #e5e5ea;
+  --tx:          #1d1d1f;
+  --tx2:         #6e6e73;
+  --tx3:         #aeaeb2;
+  --bd:          #e5e5ea;
+  --bd2:         #d2d2d7;
+  --overlay:     rgba(0, 0, 0, 0.25);
+  --header-bg:   rgba(245, 245, 247, 0.85);
+  --tooltip-bg:  #ffffff;
+  --tooltip-sh:  rgba(0, 0, 0, 0.1);
+  --grid-line:   rgba(0, 0, 0, 0.06);
+  --scroll-th:   rgba(0, 0, 0, 0.12);
+  --scroll-th-h: rgba(0, 0, 0, 0.22);
+  --date-filter:  none;
+  --slider-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+  --slider-shadow-h: 0 2px 8px rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
+  --input-bg:    #f0f0f0;
+  --accent-subtle: rgba(10, 132, 255, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Global Resets
+   ═══════════════════════════════════════════════════════════ */
+
+* {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  /* iOS safe area support */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ─── Smooth theme transition ─── */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+}
+
+/* Exclude animations/transforms/chart elements from the global transition */
+svg *,
+.recharts-surface *,
+input[type="range"]::-webkit-slider-thumb,
+.no-transition {
+  transition-property: none !important;
+}
+
+/* Re-enable only color transitions for SVG text */
+svg text {
+  transition-property: fill;
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+}
+
+/* ─── Scrollbar (desktop) ─── */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scroll-th);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-th-h);
+  }
+}
+
+/* Thin scrollbar on mobile */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scroll-th);
+    border-radius: 2px;
+  }
+}
+
+/* ─── Range slider ─── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+  outline: none;
+  /* Ensure full touch area on mobile */
+  padding: 12px 0;
+  margin: -12px 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: none;
+  box-shadow: var(--slider-shadow);
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.08);
+  box-shadow: var(--slider-shadow-h);
+}
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+/* Bigger thumb on touch devices */
+@media (pointer: coarse) {
+  input[type="range"]::-webkit-slider-thumb {
+    width: 26px;
+    height: 26px;
+  }
+  input[type="range"] {
+    height: 6px;
+    padding: 14px 0;
+    margin: -14px 0;
+  }
+}
+
+/* ─── Recharts overrides ─── */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--grid-line) !important;
+}
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* ─── Date input ─── */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: var(--date-filter);
+}
+
+/* Make date/text inputs minimum 16px on iOS to prevent zoom */
+@media (max-width: 767px) {
+  input[type="date"],
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* ─── Animations ─── */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out;
+}
+
+/* ─── Mobile scroll fade hint ─── */
+.scroll-fade-right {
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+/* ─── Touch helpers ─── */
+@media (pointer: coarse) {
+  /* Ensure minimum 44px tap targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Except for small indicator buttons */
+  .tap-sm {
+    min-height: unset;
+    min-width: unset;
+  }
+}
