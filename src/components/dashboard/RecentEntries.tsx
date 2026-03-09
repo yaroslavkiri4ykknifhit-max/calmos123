@@ -139,9 +139,9 @@ function MobileEntryCard({
       <div className="grid grid-cols-4 gap-2">
         {[
           { label: 'Sleep', value: `${metric.sleep_hours}h`, color: 'text-[#5e5ce6]' },
-          { label: 'Stress', value: metric.stress_level, color: 'text-[#ff453a]' },
-          { label: 'Energy', value: metric.energy_level, color: 'text-[#ff9f0a]' },
-          { label: 'Focus', value: metric.focus_level, color: 'text-[#0a84ff]' },
+          { label: 'Stress', value: metric.stress, color: 'text-[#ff453a]' },
+          { label: 'Energy', value: metric.energy, color: 'text-[#ff9f0a]' },
+          { label: 'Focus', value: metric.focus, color: 'text-[#0a84ff]' },
         ].map(({ label, value, color }) => (
           <div key={label} className="text-center py-2 rounded-lg bg-[var(--elev)]/50">
             <p className={`text-[16px] font-bold tabular-nums ${color}`}>{value}</p>
@@ -160,16 +160,16 @@ function MobileEntryCard({
           <div className="w-full h-[4px] rounded-full bg-[var(--elev)] overflow-hidden">
             <div
               className={`h-full rounded-full ${
-                metric.stress_level > 7
+                metric.stress > 7
                   ? 'bg-[#ff453a]'
-                  : metric.stress_level > 5
+                  : metric.stress > 5
                   ? 'bg-[#ff9f0a]'
                   : 'bg-[#30d158]'
               }`}
-              style={{ width: `${metric.stress_level * 10}%` }}
+              style={{ width: `${metric.stress * 10}%` }}
             />
           </div>
-          <span className="text-[11px] text-[var(--tx3)] tabular-nums">{metric.stress_level}</span>
+          <span className="text-[11px] text-[var(--tx3)] tabular-nums">{metric.stress}</span>
         </div>
       </div>
 
@@ -198,9 +198,14 @@ interface RecentEntriesProps {
 }
 
 export default function RecentEntries({ entries, count = 10 }: RecentEntriesProps) {
-  const display = [...entries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, count);
+  
   const [modalMetric, setModalMetric] = useState<DailyMetric | null>(null);
 
+  const display = [...entries]
+  .filter((e) => e.date && !isNaN(new Date(e.date).getTime()))
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, count);
+  
   return (
     <>
       {/* Header */}
@@ -268,25 +273,25 @@ export default function RecentEntries({ entries, count = 10 }: RecentEntriesProp
                         <div className="w-12 lg:w-16 h-[5px] rounded-full bg-[var(--elev)] overflow-hidden">
                           <div
                             className={`h-full rounded-full ${
-                              m.stress_level > 7
+                              m.stress > 7
                                 ? 'bg-[#ff453a]'
-                                : m.stress_level > 5
+                                : m.stress > 5
                                 ? 'bg-[#ff9f0a]'
                                 : 'bg-[#30d158]'
                             }`}
-                            style={{ width: `${m.stress_level * 10}%` }}
+                            style={{ width: `${m.stress * 10}%` }}
                           />
                         </div>
                         <span className="text-[13px] text-[var(--tx2)] tabular-nums w-4">
-                          {m.stress_level}
+                          {m.stress}
                         </span>
                       </div>
                     </td>
                     <td className="px-4 lg:px-6 py-3.5 text-[var(--tx2)] text-[13px] tabular-nums hidden md:table-cell">
-                      {m.energy_level}
+                      {m.energy}
                     </td>
                     <td className="px-4 lg:px-6 py-3.5 text-[var(--tx2)] text-[13px] tabular-nums hidden md:table-cell">
-                      {m.focus_level}
+                      {m.focus}
                     </td>
                     <td className="px-4 lg:px-6 py-3.5">
                       <span className="text-[13px] font-semibold text-[#30d158] tabular-nums">

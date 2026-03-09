@@ -7,8 +7,8 @@ import { ArrowRight } from 'lucide-react';
 export default function Login() {
   const { user, signIn, loading } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('demo@calmos.app');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   // Navigate to dashboard once user state is confirmed set by React
   useEffect(() => {

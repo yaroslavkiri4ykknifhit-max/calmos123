@@ -1,15 +1,6 @@
-// ============================================================
-// MindMetrics — Auth Context
-// ============================================================
-// Provides authentication state to the entire component tree.
-// In production this would listen to supabase.auth.onAuthStateChange
-// and expose signIn / signUp / signOut helpers.
-//
-// For this scaffold it uses local state to simulate auth flow.
-// ============================================================
-
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { UserProfile } from '@/types/database';
+import { supabase } from '@/lib/supabase';
 
 interface AuthState {
   user: UserProfile | null;
@@ -19,35 +10,84 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-// Demo user for the scaffold
-const DEMO_USER: UserProfile = {
-  id: 'demo-user-001',
-  email: 'demo@mindmetrics.app',
-  created_at: new Date().toISOString(),
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ user: null, loading: false });
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    loading: true,
+  });
 
-  const signIn = useCallback(async (_email: string, _password: string) => {
-    setState({ user: null, loading: true });
-    // Simulate network delay
-    await new Promise((r) => setTimeout(r, 600));
-    setState({ user: { ...DEMO_USER, email: _email }, loading: false });
+  // 🔹 Восстановление сессии после refresh
+  useEffect(() => {
+    const restoreSession = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      setState({
+        user: data.session?.user ?? null,
+        loading: false,
+      });
+    };
+
+    restoreSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setState({
+        user: session?.user ?? null,
+        loading: false,
+      });
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
-  const signUp = useCallback(async (_email: string, _password: string) => {
-    setState({ user: null, loading: true });
-    await new Promise((r) => setTimeout(r, 600));
-    setState({ user: { ...DEMO_USER, email: _email }, loading: false });
+  const signIn = useCallback(async (email: string, password: string) => {
+    setState((s) => ({ ...s, loading: true }));
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(error.message);
+      setState({ user: null, loading: false });
+      return;
+    }
+
+    setState({
+      user: data.user as any,
+      loading: false,
+    });
   }, []);
 
-  const signOut = useCallback(() => {
+  const signUp = useCallback(async (email: string, password: string) => {
+    setState((s) => ({ ...s, loading: true }));
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(error.message);
+      setState({ user: null, loading: false });
+      return;
+    }
+
+    setState({
+      user: data.user as any,
+      loading: false,
+    });
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
     setState({ user: null, loading: false });
   }, []);
 

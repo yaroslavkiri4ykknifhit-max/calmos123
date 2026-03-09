@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useMetrics } from '@/context/MetricsContext';
+
 import { calcCalmScore, calcBurnoutRisk } from '@/utils/formulas';
+import { supabase } from '@/lib/supabase';
 import {
   Save,
   Wind,
@@ -82,7 +83,7 @@ function MetricSlider({
 
 export default function DailyEntry() {
   const { user } = useAuth();
-  const { metrics, addMetric } = useMetrics();
+  
   const navigate = useNavigate();
 
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -97,26 +98,64 @@ export default function DailyEntry() {
 
   const calmPreview = calcCalmScore(energy, focus, stress);
   const burnoutPreview = calcBurnoutRisk(stress);
+  
+  
+  const [existingDates, setExistingDates] = useState<string[]>([]);
+  
+  const existingEntry = existingDates.includes(date);
+  
+  useEffect(() => {
 
-  const existingEntry = metrics.find((m) => m.date === date);
+  if (!user) return;
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
+  const fetchDates = async () => {
+    const { data } = await supabase
+    .from('metrics')
+    .select('date')
+    .eq('user_id', user?.id);
 
-    addMetric({
-      user_id: user.id,
-      date,
-      sleep_hours: sleepHours,
-      stress_level: stress,
-      energy_level: energy,
-      focus_level: focus,
-      notes: notes.trim() || undefined,
-    });
+  if (!data) return;
 
-    setSaved(true);
-    setTimeout(() => navigate('/dashboard'), 1200);
+  const dates = data.map(d => d.date);
+    setExistingDates(dates);
   };
+
+  fetchDates();
+}, [user]);
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+
+  if (!user) {
+    console.error("No user found");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('metrics')
+    .insert([
+    {
+      user_id: user.id,
+      date: date,
+      stress: stress,
+      energy: energy,
+      calm: calmPreview,
+      burnout: burnoutValue,
+      notes: notes.trim() || null
+    }
+    ])
+    .select();
+
+  if (error) {
+  console.error("SUPABASE ERROR:", error);
+  alert(error.message);
+  return;
+}
+
+  console.log("INSERT SUCCESS:", data);
+
+  setSaved(true);
+  setTimeout(() => navigate("/dashboard"), 1200);
+};
 
   if (saved) {
     return (
