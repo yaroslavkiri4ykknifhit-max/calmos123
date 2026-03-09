@@ -352,9 +352,12 @@ export default function DailyReport() {
   const todayStr = new Date().toISOString().slice(0, 10);
 
   const sorted = useMemo(
-    () => [...metrics].sort((a, b) => b.date.localeCompare(a.date)),
-    [metrics]
-  );
+  () =>
+    metrics
+      .filter((m) => m.date && m.stress_level !== null)
+      .sort((a, b) => b.date.localeCompare(a.date)),
+  [metrics]
+);
 
   const uniqueDates = useMemo(() => {
     const seen = new Set<string>();
