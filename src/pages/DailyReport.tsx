@@ -354,7 +354,14 @@ export default function DailyReport() {
   const sorted = useMemo(
   () =>
     metrics
-      .filter((m) => m.date && m.stress_level !== null)
+      .filter(
+        (m) =>
+          m.date &&
+          m.sleep_hours !== null &&
+          m.stress_level !== null &&
+          m.energy_level !== null &&
+          m.focus_level !== null
+      )
       .sort((a, b) => b.date.localeCompare(a.date)),
   [metrics]
 );
