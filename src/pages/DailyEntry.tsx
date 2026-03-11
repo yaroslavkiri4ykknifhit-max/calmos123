@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-
+import { useMetrics } from "@/context/MetricsContext";
 import { calcCalmScore, calcBurnoutRisk } from '@/utils/formulas';
 import { supabase } from '@/lib/supabase';
 import {
@@ -82,8 +82,10 @@ function MetricSlider({
 }
 
 export default function DailyEntry() {
-  const { user } = useAuth();
   
+  const { user } = useAuth();
+  const { refreshMetrics } = useMetrics();
+
   const navigate = useNavigate();
 
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -153,6 +155,8 @@ const handleSubmit = async (e: FormEvent) => {
 
   console.log("INSERT SUCCESS:", data);
 
+  await refreshMetrics();
+  
   setSaved(true);
   setTimeout(() => navigate("/dashboard"), 1200);
 };

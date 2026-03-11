@@ -354,26 +354,24 @@ export default function DailyReport() {
   const sorted = useMemo(
   () =>
     metrics
-      .filter(
-        (m) =>
-          m.date &&
-          m.sleep_hours !== null &&
-          m.stress_level !== null &&
-          m.energy_level !== null &&
-          m.focus_level !== null
-      )
+      .filter((m) => m.date)
       .sort((a, b) => b.date.localeCompare(a.date)),
   [metrics]
 );
 
   const uniqueDates = useMemo(() => {
-    const seen = new Set<string>();
-    return sorted.filter((m) => {
-      if (seen.has(m.date)) return false;
-      seen.add(m.date);
-      return true;
-    });
-  }, [sorted]);
+  const seen = new Set<string>();
+
+  return sorted.filter((m) => {
+    if (!m.date) return false;
+
+    if (seen.has(m.date)) return false;
+
+    seen.add(m.date);
+
+    return true;
+  });
+}, [sorted]);
 
   const defaultDate = uniqueDates.find((m) => m.date === todayStr)
     ? todayStr
